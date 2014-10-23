@@ -1,0 +1,73 @@
+package com.test.framework;
+
+import java.io.File;
+import java.io.IOException;
+
+import jxl.Cell;
+import jxl.Sheet;
+import jxl.Workbook;
+import jxl.read.biff.BiffException;
+
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
+public class ExcelDataProvider
+{
+	Workbook rb;
+	Sheet rsh;
+	static int row_count;
+	static int column_count;
+	
+	public ExcelDataProvider() throws BiffException, IOException
+	{
+		try
+		{
+			File read_excel = new File("C:\\Users\\268435\\workspace\\MHSFrameWork\\data\\credential_detail.xls"); 
+			rb = Workbook.getWorkbook(read_excel);
+			rsh = rb.getSheet(0);
+			row_count = rsh.getRows();
+			column_count = rsh.getColumns();
+			
+		}
+		catch(IndexOutOfBoundsException e)
+		{
+			System.out.println("File was open.Please close the file");
+		}
+	}
+	
+	
+	public String readExcel(int row,int column)
+	{
+		return rsh.getCell(column,row).getContents();
+	}
+	
+	
+	@DataProvider(name ="ReadExcel")
+	
+	public static Object[][] credentials() throws BiffException, IOException
+	{
+		String [][] tabArray = null;
+		tabArray = new String[row_count][column_count];
+		ExcelDataProvider read = new ExcelDataProvider();
+		for (int i=0;i<row_count-1; i++)
+		{
+		 for(int j=0;j<column_count; j++)
+		 {
+			tabArray[i][j] = read.readExcel(i+1,j);	
+			//System.out.println("Am inside loop" + tabArray[i][j]);			 
+		}
+		
+		} 
+		return(tabArray);
+	}
+	
+	@Test(dataProvider="ReadExcel")
+	
+	public void test(String userName,String password)
+	{		
+		System.out.println("userName" + userName + "Password " + password);
+		
+	}
+	
+
+}
